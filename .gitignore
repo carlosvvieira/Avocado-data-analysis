@@ -1,129 +1,229 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+#!/usr/bin/env python
+# coding: utf-8
 
-# C extensions
-*.so
+# In[1]:
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+import os
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import pylab as plt
+from pylab import rcParams
+import matplotlib.pyplot as plt
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+rcParams['figure.figsize'] = 12, 8
+import seaborn as sns
+# Input data files are available in the "../input/" directory.
+# For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
+pd.options.display.max_rows = 20
 
-# Translations
-*.mo
-*.pot
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+# In[61]:
 
-# Flask stuff:
-instance/
-.webassets-cache
 
-# Scrapy stuff:
-.scrapy
+avocado=pd.read_csv("data/avocado.csv")
 
-# Sphinx documentation
-docs/_build/
 
-# PyBuilder
-target/
+# In[ ]:
 
-# Jupyter Notebook
-.ipynb_checkpoints
 
-# IPython
-profile_default/
-ipython_config.py
+# Avocado data from all over the world from 2015 to 2018
 
-# pyenv
-.python-version
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+# In[62]:
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+avocado
 
-# SageMath parsed files
-*.sage.py
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+# In[4]:
 
-# Spyder project settings
-.spyderproject
-.spyproject
 
-# Rope project settings
-.ropeproject
+avocado.info()
 
-# mkdocs documentation
-/site
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# In[5]:
 
-# Pyre type checker
-.pyre/
+
+# Understanding the data
+avocado.head()
+
+
+# In[6]:
+
+
+# check for missing data
+avocado.isnull().sum()
+
+
+# In[7]:
+
+
+type(avocado)
+
+
+# In[90]:
+
+
+# Type of avocado in total volume of sell
+# We can see that the conventional is way more in volume than the organic one. The organic total volume is 2.90% of the volume
+# of Conventional.
+avocado.groupby(['type'])['Total Volume'].sum()
+
+
+# In[ ]:
+
+
+# Clarifying columns
+
+
+# In[9]:
+
+
+avocado.columns
+
+
+# In[10]:
+
+
+avocado.rename(columns={'4046':'Small HASS sold',
+                          '4225':'Large HASS sold',
+                          '4770':'XLarge HASS sold'}, 
+                 inplace=True)
+
+
+# In[11]:
+
+
+avocado.columns
+
+
+# In[12]:
+
+
+# Spread of Average Price in the data
+sns.distplot(avocado["AveragePrice"],axlabel="Distribution of average price")
+
+
+# In[13]:
+
+
+# Type of avocado vs Average price.
+# Organic avocado price is higher than the conventional one
+
+
+# In[13]:
+
+
+sns.boxplot(x="type", y="AveragePrice", data=avocado)
+
+
+# In[15]:
+
+
+# How Average price varies over the years
+# in 2017 the price had a slightly higher price
+
+
+# In[16]:
+
+
+sns.boxplot(x="year", y="AveragePrice", data=avocado)
+
+
+# In[94]:
+
+
+# There are 54 differents places over the World in the data
+avocado['region'].value_counts()
+
+
+# In[ ]:
+
+
+# Total volume of avocado over the years separated in organic and conventional
+# We can see that it is seasonal, in February there are peaks and in September the volume starts to decrease, so it is more
+# a summer appetite 
+
+
+# In[19]:
+
+
+avocado['Date'] = pd.to_datetime(avocado['Date'])
+avocado.head()
+
+
+# In[55]:
+
+
+totalvolume = avocado['Total Volume'] 
+totalvolume
+
+
+# In[68]:
+
+
+avocado.columns
+
+
+# In[71]:
+
+
+avocado['Date'] = avocado['Date'].apply(pd.Timestamp)
+
+
+# In[73]:
+
+
+avocado.set_index('Date',inplace=True)
+
+
+# In[75]:
+
+
+avocado.head()
+
+
+# In[78]:
+
+
+avocado.reset_index(inplace=True)
+
+
+# In[82]:
+
+
+avocado['Date'].duplicated().any()
+
+
+# In[83]:
+
+
+avocado_tmp = avocado.groupby(['Date','type'])['Total Volume'].sum()
+
+
+# In[87]:
+
+
+avocado_tmp = avocado_tmp.reset_index()
+
+
+# In[88]:
+
+
+fig = px.line(avocado_tmp, x="Date", y="Total Volume", color='type')
+fig.show()
+
+
+# In[74]:
+
+
+avocado['Total Volume'].plot()
+
+
+# In[ ]:
+
+
+
+
